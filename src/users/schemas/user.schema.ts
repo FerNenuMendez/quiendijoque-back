@@ -6,7 +6,7 @@ import { Role } from '../../common/enums/roles.enum';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Schema({
-  collection: 'cb_trv_users',
+  collection: 'game_users',
   timestamps: true,
   toJSON: {
     virtuals: true,
@@ -44,7 +44,7 @@ export class User extends Document {
   })
   @Prop({
     type: String,
-    enum: [Role.USER, Role.ADMIN, Role.USERPLUS, Role.USEREXCEL],
+    enum: [Role.USER, Role.ADMIN, Role.USERPLUS],
     default: Role.USER,
   })
   role: Role;

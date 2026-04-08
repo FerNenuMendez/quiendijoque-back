@@ -11,7 +11,7 @@ import { Role } from '../../common/enums/roles.enum';
 
 export class RegisterDto {
   @ApiProperty({
-    example: 'nenu@viajes.com',
+    example: 'nenu@gmail.com',
     description: 'El email del usuario',
   })
   @IsEmail({}, { message: 'El email no es válido' })

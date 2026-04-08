@@ -53,7 +53,7 @@ export class UsersService {
       const url = `http://localhost:3000/auth/verify/${token}`;
       await this.mailerService.sendMail({
         to: newUser.email,
-        subject: 'Confirma tu cuenta de viajes',
+        subject: 'Confirma tu cuenta de ¿Quien Dijo Que?',
         html: `
           <h3>¡Hola ${newUser.name}!</h3>
           <p>Gracias por registrarte. Por favor, hacé clic en el siguiente enlace para activar tu cuenta:</p>

@@ -26,7 +26,7 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('CB Travel API')
-    .setDescription('Documentación de la API de gestión de viajes')
+    .setDescription('Documentación de la API de Juegos')
     .setVersion('1.0')
     .addBearerAuth()
     .build();

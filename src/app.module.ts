@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { CategoriesModule } from './categories/categories.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
         },
       }),
     }),
+    CategoriesModule,
   ],
 })
 export class AppModule {}

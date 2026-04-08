@@ -67,6 +67,20 @@ export class User extends Document {
 
   @Prop()
   verificationToken?: string;
+
+  @ApiProperty({
+    example: 'Nenu_99',
+    description: 'Nombre de usuario para mostrar en el juego',
+  })
+  @Prop({ unique: true, sparse: true }) // sparse permite que no choque si hay usuarios viejos sin este campo
+  username?: string;
+
+  @ApiProperty({
+    example: 150,
+    description: 'Puntos totales acumulados por el jugador',
+  })
+  @Prop({ default: 0 })
+  totalPoints: number;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

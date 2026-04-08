@@ -98,4 +98,23 @@ export class UsersService {
     }
     return user;
   }
+
+  // Método para sumar puntos al terminar una ronda victoriosa
+  async addPoints(userId: string, pointsToAdd: number): Promise<User> {
+    const updatedUser = await this.userModel
+      .findByIdAndUpdate(
+        userId,
+        { $inc: { totalPoints: pointsToAdd } },
+        { new: true }, // Devuelve el documento ya actualizado
+      )
+      .exec();
+
+    if (!updatedUser) {
+      throw new NotFoundException(
+        'Usuario no encontrado al intentar actualizar puntos',
+      );
+    }
+
+    return updatedUser;
+  }
 }

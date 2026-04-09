@@ -19,6 +19,14 @@ export class RegisterDto {
   email: string;
 
   @ApiProperty({
+    example: 'Nenu_99',
+    description: 'Nombre de usuario visible en el juego',
+  })
+  @IsString()
+  @IsNotEmpty({ message: 'El nombre de usuario es obligatorio' })
+  username: string;
+
+  @ApiProperty({
     example: '123456',
     description: 'Contraseña (mínimo 6 caracteres)',
   })
@@ -39,7 +47,7 @@ export class RegisterDto {
     enum: Role,
     default: Role.USER,
     required: false,
-    description: 'Nivel de acceso del usuario',
+    description: 'Nivel de acceso del usuario (Opcional, por defecto USER)',
   })
   @IsEnum(Role)
   @IsOptional()

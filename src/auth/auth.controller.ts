@@ -15,7 +15,13 @@ import { AuthService } from './auth.service';
 import * as express from 'express';
 import { UsersService } from '../users/users.service';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBody,
+} from '@nestjs/swagger';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { ConfigService } from '@nestjs/config';
@@ -32,11 +38,11 @@ export class AuthController {
   @ApiOperation({ summary: 'Redirigir a Google para autenticación' })
   @ApiResponse({
     status: 302,
-    description: 'Redirige a Google para autenticación.',
+    description: 'Redirige a la pantalla de login de Google.',
   })
   @ApiResponse({
     status: 401,
-    description: 'No autorizado (si el Guard falla antes de redirigir).',
+    description: 'No autorizado (Falla en el Guard).',
   })
   @Get('google')
   @UseGuards(GoogleAuthGuard)
@@ -45,10 +51,10 @@ export class AuthController {
     // El Guard redirige automáticamente a Google
   }
 
-  @ApiOperation({ summary: 'Callback de Google' })
+  @ApiOperation({ summary: 'Callback de Google OAuth' })
   @ApiResponse({
     status: 200,
-    description: 'Login exitoso y cookie establecida.',
+    description: 'Login exitoso mediante Google y cookie establecida.',
   })
   @ApiResponse({
     status: 400,
@@ -64,14 +70,12 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: 'Login tradicional con email y contraseña' })
+  @ApiBody({ type: LoginDto })
   @ApiResponse({
     status: 200,
-    description: 'Login exitoso y cookie establecida.',
+    description: 'Login exitoso y cookie de sesión establecida.',
   })
-  @ApiResponse({
-    status: 400,
-    description: 'Datos de entrada inválidos (ValidationPipe).',
-  })
+  @ApiResponse({ status: 400, description: 'Datos de entrada inválidos.' })
   @ApiResponse({ status: 401, description: 'Credenciales inválidas.' })
   @Post('login')
   async login(
@@ -100,23 +104,31 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: 'Cerrar sesión' })
-  @ApiResponse({ status: 201, description: 'Cookie eliminada correctamente.' })
+  @ApiResponse({
+    status: 201,
+    description: 'Cookie eliminada correctamente. Sesión cerrada.',
+  })
   @Post('logout')
   logout(@Res({ passthrough: true }) res: express.Response) {
     res.clearCookie('access_token');
     return { message: 'Sesión cerrada correctamente' };
   }
 
-  @ApiOperation({ summary: 'Registrar un nuevo usuario' })
+  @ApiOperation({ summary: 'Registrar un nuevo jugador' })
+  @ApiBody({ type: RegisterDto })
   @ApiResponse({
     status: 201,
-    description: 'Usuario registrado con éxito. Revisar correo.',
+    description:
+      'Usuario registrado con éxito. Se envió correo de verificación.',
   })
   @ApiResponse({
     status: 400,
     description: 'Error de validación en los datos enviados.',
   })
-  @ApiResponse({ status: 409, description: 'El email ya está en uso.' })
+  @ApiResponse({
+    status: 409,
+    description: 'El email ya se encuentra registrado.',
+  })
   @Post('register')
   async register(@Body() registerDto: RegisterDto) {
     await this.usersService.create(registerDto);
@@ -125,9 +137,19 @@ export class AuthController {
         'Registro exitoso. Por favor, revisá tu correo para activar la cuenta.',
     };
   }
-  // ---> ENDPOINT DE VERIFICACIÓN
+
   @ApiOperation({
     summary: 'Verificar cuenta mediante token enviado por email',
+  })
+  @ApiParam({
+    name: 'token',
+    description: 'Token único de 64 caracteres enviado al correo del usuario',
+  })
+  @ApiResponse({ status: 200, description: 'Cuenta activada correctamente.' })
+  @ApiResponse({ status: 400, description: 'Falta el token de verificación.' })
+  @ApiResponse({
+    status: 404,
+    description: 'Token inválido o cuenta ya verificada.',
   })
   @Get('verify/:token')
   async verifyEmail(@Param('token') token: string) {

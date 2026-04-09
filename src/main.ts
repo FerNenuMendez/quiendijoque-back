@@ -13,9 +13,9 @@ async function bootstrap() {
 
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true, // Ignora campos que no estén en el DTO
-      forbidNonWhitelisted: true, // Tira error si mandan campos de más
-      transform: true, // Convierte tipos automáticamente
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
     }),
   );
   app.use(cookieParser());
@@ -24,11 +24,14 @@ async function bootstrap() {
     credentials: true,
   });
 
+  // 👇 Actualizamos la config de Swagger
   const config = new DocumentBuilder()
-    .setTitle('CB Travel API')
-    .setDescription('Documentación de la API de Juegos')
+    .setTitle('¿Quién Dijo Qué? - API')
+    .setDescription(
+      'Documentación oficial del backend para el juego interactivo de frases.',
+    )
     .setVersion('1.0')
-    .addBearerAuth()
+    .addCookieAuth('access_token') // Le decimos que usamos Cookies
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
@@ -37,6 +40,6 @@ async function bootstrap() {
   const port = configService.get<number>('PORT');
 
   await app.listen(port ?? 3000);
-  console.log(`API running on: http://localhost:${port}/api`);
+  console.log(`API running on: http://localhost:${port ?? 3000}/api`);
 }
 void bootstrap();

@@ -6,18 +6,27 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../common/enums/roles.enum';
 import type { Request } from 'express';
-import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiCookieAuth,
+} from '@nestjs/swagger';
+import { CreateCategoryDto } from './dto/create-category.dto';
 
 @ApiTags('Categorias')
-@ApiBearerAuth()
+@ApiCookieAuth()
 @Controller('categories')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
-  // Endpoint público para los jugadores logueados
   @UseGuards(JwtAuthGuard)
   @ApiOperation({
-    summary: 'Obtener todas las categorías con estado de bloqueo',
+    summary: 'Obtener todas las categorías con su estado de bloqueo (candado)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de categorías evaluadas según el rol del usuario.',
   })
   @Get()
   findAll(@Req() req: Request) {
@@ -25,13 +34,22 @@ export class CategoriesController {
     return this.categoriesService.findAllForUser(userRole);
   }
 
-  // Endpoint restringido solo para que vos (Admin) puedas crear categorías
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Crear una nueva categoría (Solo Admin)' })
+  @ApiOperation({
+    summary: 'Crear una nueva categoría (Acceso exclusivo para Admin)',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'La categoría fue creada exitosamente.',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Prohibido. Se requiere rol de Administrador.',
+  })
   @Post()
-  create(@Body() createCategoryDto: any) {
-    // Idealmente acá usarías un DTO validado con class-validator
+  create(@Body() createCategoryDto: CreateCategoryDto) {
+    // Usamos el DTO
     return this.categoriesService.create(createCategoryDto);
   }
 }

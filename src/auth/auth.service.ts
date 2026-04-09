@@ -16,6 +16,7 @@ interface GoogleUser {
   lastName: string;
   picture?: string;
 }
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -59,8 +60,15 @@ export class AuthService {
     // 2. Si no existe, lo registramos automáticamente
     if (!userInDb) {
       const randomPassword = Math.random().toString(36).slice(-10);
+
+      // Generamos un username automático usando la primera parte del email
+      const baseUsername = user.email.split('@')[0];
+      const randomSuffix = Math.floor(Math.random() * 10000);
+      const generatedUsername = `${baseUsername}_${randomSuffix}`;
+
       userInDb = await this.usersService.create({
         email: user.email,
+        username: generatedUsername, // <--- Username inyectado acá
         name: `${user.firstName} ${user.lastName}`,
         password: randomPassword,
         role: Role.USER,

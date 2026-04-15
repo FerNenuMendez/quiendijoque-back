@@ -41,7 +41,7 @@ export class UsersController {
     const userId = (req.user as any).userId;
 
     // Validación rápida de seguridad (evita que manden puntos negativos o una locura de puntos)
-    if (!points || points < 0 || points > 10) {
+    if (!points || points < 0 || points > 100) {
       return { message: 'Puntaje inválido' };
     }
 

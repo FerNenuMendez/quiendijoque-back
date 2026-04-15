@@ -105,7 +105,7 @@ export class UsersService {
       .findByIdAndUpdate(
         userId,
         { $inc: { totalPoints: pointsToAdd } },
-        { new: true }, // Devuelve el documento ya actualizado
+        { returnDocument: 'after' }, // Devuelve el documento ya actualizado
       )
       .exec();
 

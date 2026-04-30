@@ -126,7 +126,7 @@ export class UsersService {
       .findByIdAndUpdate(
         userId,
         { username: newUsername },
-        { new: true, runValidators: true },
+        { returnDocument: 'after', runValidators: true },
       )
       .exec();
 
@@ -180,7 +180,11 @@ export class UsersService {
   // 🔥 Guardar Avatar
   async updateAvatar(userId: string, avatarBase64: string) {
     const updatedUser = await this.userModel
-      .findByIdAndUpdate(userId, { avatar: avatarBase64 }, { new: true })
+      .findByIdAndUpdate(
+        userId,
+        { avatar: avatarBase64 },
+        { returnDocument: 'after' },
+      )
       .exec();
     return updatedUser;
   }

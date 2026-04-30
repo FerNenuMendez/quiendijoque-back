@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
@@ -32,10 +31,10 @@ export class User extends Document {
   email: string;
 
   @Prop()
-  password?: string; // Opcional porque si entra por Google no tendrá password manual
+  password?: string;
 
   @Prop()
-  googleId?: string; // Para guardar el ID que nos mande Google
+  googleId?: string;
 
   @ApiProperty({
     enum: Role,
@@ -72,7 +71,7 @@ export class User extends Document {
     example: 'Nenu_99',
     description: 'Nombre de usuario para mostrar en el juego',
   })
-  @Prop({ unique: true, sparse: true }) // sparse permite que no choque si hay usuarios viejos sin este campo
+  @Prop({ unique: true, sparse: true })
   username?: string;
 
   @ApiProperty({
@@ -81,6 +80,14 @@ export class User extends Document {
   })
   @Prop({ default: 0 })
   totalPoints: number;
+
+  // 🔥 NUEVO: Array para guardar las categorías desbloqueadas
+  @ApiProperty({
+    example: ['65f1a2b3c4d5e6f7a8b9c0d1'],
+    description: 'IDs de las categorías premium que el usuario compró',
+  })
+  @Prop({ type: [String], default: [] })
+  unlockedCategories: string[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

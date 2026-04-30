@@ -26,6 +26,19 @@ import {
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  // ====================================================================
+  // 🔥 NUEVO: Ranking Global (Top 50)
+  // ====================================================================
+  @UseGuards(JwtAuthGuard)
+  @Get('ranking')
+  @ApiOperation({ summary: 'Obtener el Top 50 de jugadores globales' })
+  async getRanking() {
+    return this.usersService.getTopPlayers();
+  }
+
+  // ====================================================================
+  // PERFIL DE USUARIO
+  // ====================================================================
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Obtener el perfil del usuario autenticado' })
   @ApiResponse({ status: 200, description: 'Perfil obtenido correctamente.' })
@@ -58,7 +71,6 @@ export class UsersController {
     };
   }
 
-  // 🔥 NUEVO: Endpoint para comprar la categoría
   @UseGuards(JwtAuthGuard)
   @Post('me/unlock')
   @ApiOperation({ summary: 'Desbloquear una categoría Premium usando puntos' })
@@ -68,20 +80,6 @@ export class UsersController {
   ) {
     const userId = (req.user as any).userId;
     return this.usersService.unlockCategory(userId, categoryId);
-  }
-
-  @ApiOperation({ summary: 'Panel de control para administradores' })
-  @ApiResponse({ status: 200, description: 'Acceso concedido.' })
-  @ApiResponse({ status: 401, description: 'No autorizado (Token inválido).' })
-  @ApiResponse({
-    status: 403,
-    description: 'Prohibido: No tienes permisos suficientes.',
-  })
-  @Get('admin-dashboard')
-  @Roles(Role.USER)
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  getAdminData() {
-    return { message: 'Bienvenido al panel de control, jefe' };
   }
 
   @UseGuards(JwtAuthGuard)
@@ -107,7 +105,7 @@ export class UsersController {
       user: updatedUser,
     };
   }
-  // 🔥 Endpoint para el Avatar
+
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Actualizar foto de perfil' })
   @Patch('me/avatar')
@@ -127,5 +125,22 @@ export class UsersController {
       body.oldPassword,
       body.newPassword,
     );
+  }
+
+  // ====================================================================
+  // ADMIN DASHBOARD
+  // ====================================================================
+  @ApiOperation({ summary: 'Panel de control para administradores' })
+  @ApiResponse({ status: 200, description: 'Acceso concedido.' })
+  @ApiResponse({ status: 401, description: 'No autorizado (Token inválido).' })
+  @ApiResponse({
+    status: 403,
+    description: 'Prohibido: No tienes permisos suficientes.',
+  })
+  @Get('admin-dashboard')
+  @Roles(Role.USER) // Tech Lead Note: ¿Seguro que es Role.USER acá? Ojo con esto si es de admin.
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  getAdminData() {
+    return { message: 'Bienvenido al panel de control, jefe' };
   }
 }

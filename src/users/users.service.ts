@@ -211,4 +211,16 @@ export class UsersService {
 
     return { message: 'Contraseña actualizada con éxito' };
   }
+
+  // Traer el Top 50 Global
+  async getTopPlayers() {
+    return this.userModel
+      .find(
+        {}, // Sin filtros, buscamos a todos
+        'username avatar totalPoints', // IMPORTANTE: Solo traemos estos datos para no filtrar emails o passwords
+      )
+      .sort({ totalPoints: -1 }) // Ordenamos de mayor a menor
+      .limit(50) // Solo el Top 50
+      .exec();
+  }
 }

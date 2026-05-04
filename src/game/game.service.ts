@@ -24,10 +24,17 @@ export class GameService {
       throw new NotFoundException('Categoría no válida');
     }
 
+    const categoryObjectId = new Types.ObjectId(categoryId);
+
+    // 🔥 LA MAGIA NUEVA: Buscamos TODOS los IDs de los autores que tienen al menos una frase en ESTA categoría
+    const validAuthorIds = await this.quoteModel.distinct('authorId', {
+      categoryId: categoryObjectId,
+    });
+
     // 2. El Aggregation Pipeline
     const questions = await this.quoteModel.aggregate([
       // Paso A: Filtramos las frases por la categoría elegida
-      { $match: { categoryId: new Types.ObjectId(categoryId) } },
+      { $match: { categoryId: categoryObjectId } },
 
       // Paso B: Agarramos 10 frases al azar ($sample es el rey acá)
       { $sample: { size: 10 } },
@@ -45,15 +52,21 @@ export class GameService {
       // Paso D: Como $lookup devuelve un array, lo desarmamos para que sea un objeto
       { $unwind: '$correctAuthor' },
 
-      // Paso E: El truco maestro. Buscamos 3 autores al azar que NO sean el autor real
+      // Paso E: El truco maestro corregido. Buscamos 3 autores al azar de la misma categoría
       {
         $lookup: {
           from: 'game_authors',
           let: { realAuthorId: '$authorId' }, // Definimos una variable temporal
           pipeline: [
-            // Filtramos para que el ID del distractor no sea igual al realAuthorId
-            { $match: { $expr: { $ne: ['$_id', '$$realAuthorId'] } } },
-            // Agarramos 3 al azar
+            {
+              $match: {
+                // 1. Nos aseguramos de que el autor pertenezca a la categoría actual
+                _id: { $in: validAuthorIds },
+                // 2. Filtramos para que el ID del distractor NO sea el real
+                $expr: { $ne: ['$_id', '$$realAuthorId'] },
+              },
+            },
+            // Agarramos 3 al azar dentro de ese grupo filtrado
             { $sample: { size: 3 } },
           ],
           as: 'distractors',

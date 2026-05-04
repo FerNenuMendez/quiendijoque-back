@@ -7,7 +7,7 @@ import { QuoteSchema } from './src/quotes/schemas/quote.schema';
 // Cargamos las variables de entorno para sacar la URL de Mongo
 dotenv.config();
 
-// 🔥 DATA MAESTRA: 50 Frases por categoría estructuradas para escalar fácil
+// 🔥 DATA MAESTRA: 50 Frases por categoría estructuradas y 100% en ESPAÑOL
 const SEED_DATA = [
   {
     category: { name: 'Rock', slug: 'rock', requiresPremium: false },
@@ -75,41 +75,41 @@ const SEED_DATA = [
       {
         name: 'Freddie Mercury',
         quotes: [
-          "I won't be a rock star. I will be a legend.",
-          'The show must go on.',
-          'I want to break free.',
-          'We are the champions, my friends.',
-          'I am a romantic, but I do put up a barrier.',
+          'No seré una estrella de rock. Seré una leyenda.',
+          'El show debe continuar.',
+          'Quiero ser libre.',
+          'Somos los campeones, mis amigos.',
+          'Soy un romántico, pero construyo una barrera a mi alrededor.',
         ],
       },
       {
         name: 'John Lennon',
         quotes: [
-          "Life is what happens to you while you're busy making other plans.",
-          'Imagine all the people living life in peace.',
-          'All you need is love.',
-          'Reality leaves a lot to the imagination.',
-          'A dream you dream alone is only a dream.',
+          'La vida es eso que te pasa mientras estás ocupado haciendo otros planes.',
+          'Imagina a toda la gente viviendo la vida en paz.',
+          'Todo lo que necesitas es amor.',
+          'La realidad deja mucho a la imaginación.',
+          'Un sueño que sueñas solo, es solo un sueño.',
         ],
       },
       {
         name: 'Kurt Cobain',
         quotes: [
-          'Come as you are, as you were.',
-          "It's better to burn out than to fade away.",
-          "I'd rather be hated for who I am.",
-          'Nobody dies a virgin, life f*cks us all.',
-          "Just because you're paranoid doesn't mean they aren't after you.",
+          'Ven tal como eres, como eras.',
+          'Es mejor arder que apagarse lentamente.',
+          'Prefiero ser odiado por lo que soy, que amado por lo que no soy.',
+          'Nadie muere virgen, la vida nos jode a todos.',
+          'Que seas paranoico no significa que no te estén persiguiendo.',
         ],
       },
       {
         name: 'Mick Jagger',
         quotes: [
-          "You can't always get what you want.",
-          "I know it's only rock 'n roll but I like it.",
-          "Wild horses couldn't drag me away.",
-          'Paint it black.',
-          'Time is on my side.',
+          'No siempre puedes conseguir lo que quieres.',
+          'Sé que es solo rock and roll, pero me gusta.',
+          'Ni los caballos salvajes podrían arrastrarme lejos de ti.',
+          'Píntalo de negro.',
+          'El tiempo está de mi lado.',
         ],
       },
     ],
@@ -120,101 +120,101 @@ const SEED_DATA = [
       {
         name: 'Darth Vader',
         quotes: [
-          'I am your father.',
-          'I find your lack of faith disturbing.',
-          'The force is strong with this one.',
-          "You don't know the power of the dark side.",
-          'No disintegrations.',
+          'Yo soy tu padre.',
+          'Encuentro tu falta de fe perturbadora.',
+          'La fuerza es intensa en este.',
+          'No conoces el poder del lado oscuro.',
+          'Nada de desintegraciones.',
         ],
       },
       {
         name: 'Vito Corleone',
         quotes: [
-          "I'm gonna make him an offer he can't refuse.",
-          "A man who doesn't spend time with his family can never be a real man.",
-          'Look how they massacred my boy.',
-          'Women and children can be careless, but not men.',
-          'I never wanted this for you, Michael.',
+          'Le haré una oferta que no podrá rechazar.',
+          'Un hombre que no pasa tiempo con su familia nunca puede ser un hombre de verdad.',
+          'Miren cómo masacraron a mi muchacho.',
+          'Las mujeres y los niños pueden ser descuidados, pero los hombres no.',
+          'Nunca quise esto para ti, Michael.',
         ],
       },
       {
         name: 'Terminator',
         quotes: [
-          "I'll be back.",
+          'Volveré.',
           'Hasta la vista, baby.',
-          'Come with me if you want to live.',
-          'I need your clothes, your boots, and your motorcycle.',
-          'It is in your nature to destroy yourselves.',
+          'Ven conmigo si quieres vivir.',
+          'Necesito tu ropa, tus botas y tu motocicleta.',
+          'Está en su naturaleza destruirse a sí mismos.',
         ],
       },
       {
         name: 'Forrest Gump',
         quotes: [
-          'My mama always said life was like a box of chocolates.',
-          'Stupid is as stupid does.',
-          'Run, Forrest, run!',
-          "I'm not a smart man, but I know what love is.",
-          "And that's all I have to say about that.",
+          'Mi mamá siempre decía que la vida es como una caja de chocolates.',
+          'Tonto es el que hace tonterías.',
+          '¡Corre, Forrest, corre!',
+          'No soy un hombre inteligente, pero sé lo que es el amor.',
+          'Y eso es todo lo que tengo que decir sobre eso.',
         ],
       },
       {
         name: 'Tyler Durden',
         quotes: [
-          'The first rule of Fight Club is: you do not talk about Fight Club.',
-          'The things you own end up owning you.',
-          "It's only after we've lost everything that we're free to do anything.",
-          'We are a generation of men raised by women.',
-          "This is your life, and it's ending one minute at a time.",
+          'La primera regla del Club de la Pelea es: nadie habla sobre el Club de la Pelea.',
+          'Las cosas que posees terminan poseyéndote.',
+          'Solo cuando perdemos todo, somos libres para hacer cualquier cosa.',
+          'Somos una generación de hombres criados por mujeres.',
+          'Esta es tu vida y se acaba un minuto a la vez.',
         ],
       },
       {
         name: 'Travis Bickle',
         quotes: [
-          "You talkin' to me?",
-          'Someday a real rain will come and wash all this scum off the streets.',
-          "I'm God's lonely man.",
-          'I got some bad ideas in my head.',
-          'Here is a man who would not take it anymore.',
+          '¿Me estás hablando a mí?',
+          'Algún día llegará una verdadera lluvia que limpiará toda esta escoria de las calles.',
+          'Soy el hombre solitario de Dios.',
+          'Tengo algunas malas ideas en mi cabeza.',
+          'Aquí hay un hombre que ya no soportaría más.',
         ],
       },
       {
         name: 'Indiana Jones',
         quotes: [
-          "It's not the years, honey. It's the mileage.",
-          'Snakes. Why did it have to be snakes?',
-          'It belongs in a museum!',
-          'X never, ever marks the spot.',
-          'Trust me.',
+          'No son los años, cariño. Es el kilometraje.',
+          'Serpientes. ¿Por qué tenían que ser serpientes?',
+          '¡Eso pertenece a un museo!',
+          'La "X" nunca, jamás, marca el lugar.',
+          'Confía en mí.',
         ],
       },
       {
         name: 'Rocky Balboa',
         quotes: [
-          "It ain't about how hard you hit.",
-          'Every champion was once a contender who refused to give up.',
-          'If I can change, and you can change, everybody can change!',
-          'Nobody owes nobody nothing.',
-          'Keep moving forward.',
+          'No se trata de qué tan fuerte golpeas, sino de cuánto puedes resistir.',
+          'Todo campeón fue una vez un contendiente que se negó a rendirse.',
+          'Si yo puedo cambiar, y tú puedes cambiar, ¡todo el mundo puede cambiar!',
+          'Nadie le debe nada a nadie.',
+          'Sigue avanzando.',
         ],
       },
       {
         name: 'Dr. Emmett Brown',
         quotes: [
-          'Great Scott!',
-          "Roads? Where we're going, we don't need roads.",
-          '1.21 Gigawatts!',
-          'Your future is whatever you make it.',
-          'If my calculations are correct...',
+          '¡Santo cielo!',
+          '¿Caminos? A donde vamos, no necesitamos caminos.',
+          '¡1.21 Gigavatios!',
+          'Tu futuro es lo que tú hagas de él.',
+          'Si mis cálculos son correctos...',
         ],
       },
       {
         name: 'Hannibal Lecter',
         quotes: [
-          'A census taker once tried to test me. I ate his liver with some fava beans and a nice Chianti.',
-          'Hello, Clarice.',
+          'Un encuestador intentó ponerme a prueba. Me comí su hígado con habas y un buen Chianti.',
+          'Hola, Clarice.',
           'Quid pro quo.',
-          'Have the lambs stopped screaming?',
-          'We begin by coveting what we see every day.',
+          '¿Han dejado de chillar los corderos?',
+          'Empezamos codiciando lo que vemos cada día.',
         ],
       },
     ],
@@ -338,81 +338,81 @@ const SEED_DATA = [
       {
         name: 'Walter White',
         quotes: [
-          'I am the one who knocks.',
-          'Say my name.',
-          'I am in the empire business.',
-          'Tread lightly.',
-          "We're done when I say we're done.",
+          'Yo soy el que llama a la puerta.',
+          'Di mi nombre.',
+          'Estoy en el negocio de los imperios.',
+          'Anda con cuidado.',
+          'Terminamos cuando yo digo que terminamos.',
         ],
       },
       {
         name: 'Michael Scott',
         quotes: [
-          "That's what she said.",
-          'I am Beyoncé, always.',
-          "I'm not superstitious, but I am a little stitious.",
-          'Would I rather be feared or loved? Easy. Both.',
-          'Bears, Beets, Battlestar Galactica.',
+          'Eso dijo ella.',
+          'Yo soy Beyoncé, siempre.',
+          'No soy supersticioso, pero soy un poco "sticioso".',
+          '¿Prefiero que me teman o que me amen? Fácil. Ambas.',
+          'Osos, remolachas, Battlestar Galactica.',
         ],
       },
       {
         name: 'Dr. Gregory House',
         quotes: [
-          'Everybody lies.',
-          "It's never lupus.",
-          'If you can fake sincerity, you can fake anything.',
-          "Normal's overrated.",
-          'Patients are idiots.',
+          'Todo el mundo miente.',
+          'Nunca es lupus.',
+          'Si puedes fingir sinceridad, puedes fingir cualquier cosa.',
+          'Lo normal está sobrevalorado.',
+          'Los pacientes son idiotas.',
         ],
       },
       {
         name: 'Sherlock Holmes',
         quotes: [
-          'The game is on.',
-          "I'm not a psychopath, I'm a high-functioning sociopath.",
-          'Brainy is the new sexy.',
-          "Anderson, don't talk out loud. You lower the IQ of the whole street.",
-          'Sentiment is a chemical defect found in the losing side.',
+          'El juego ha comenzado.',
+          'No soy un psicópata, soy un sociópata altamente funcional.',
+          'La inteligencia es el nuevo concepto de sexy.',
+          'Anderson, no hables en voz alta. Bajas el coeficiente intelectual de toda la calle.',
+          'El sentimentalismo es un defecto químico que se encuentra en el bando perdedor.',
         ],
       },
       {
         name: 'Daenerys Targaryen',
         quotes: [
           'Dracarys.',
-          "I am not going to stop the wheel, I'm going to break the wheel.",
-          'I will take what is mine with fire and blood.',
-          'A dragon is not a slave.',
-          "Any man who must say 'I am the king' is no true king.",
+          'No voy a detener la rueda, voy a romper la rueda.',
+          'Tomaré lo que es mío con fuego y sangre.',
+          'Un dragón no es un esclavo.',
+          'Soy la madre de dragones.',
         ],
       },
       {
         name: 'Tony Soprano',
         quotes: [
-          'Those who want respect, give respect.',
-          'A wrong decision is better than indecision.',
-          "You're only as good as your last envelope.",
-          'Even a broken clock is right twice a day.',
-          'There is no Mafia.',
+          'Aquellos que quieren respeto, dan respeto.',
+          'Una mala decisión es mejor que la indecisión.',
+          'Eres tan bueno como tu último sobre.',
+          'Incluso un reloj roto tiene razón dos veces al día.',
+          'No existe la mafia.',
         ],
       },
       {
         name: 'Saul Goodman',
         quotes: [
-          "It's all good, man!",
-          "Lawyers: We're like health insurance.",
-          "I am not a criminal lawyer, I'm a criminal lawyer.",
-          'Perfection is the enemy of perfectly adequate.',
-          "Let's get down to brass tacks.",
+          '¡Todo está bien, viejo!',
+          'Los abogados somos como el seguro médico.',
+          'No soy un abogado criminalista, soy un abogado criminal.',
+          'La perfección es el enemigo de lo perfectamente adecuado.',
+          'Vayamos al grano.',
         ],
       },
       {
         name: 'Dexter Morgan',
         quotes: [
-          "Tonight's the night.",
-          'I love Halloween. The one time of year when everyone wears a mask, not just me.',
-          'Blood never lies.',
-          "Monsters don't get to live happily ever after.",
-          "I'm a very neat monster.",
+          'Esta es la noche.',
+          'Me encanta Halloween. Es la única época del año en que todos usan máscara, no solo yo.',
+          'La sangre nunca miente.',
+          'Los monstruos no consiguen vivir felices para siempre.',
+          'Soy un monstruo muy ordenado.',
         ],
       },
       {
@@ -428,11 +428,11 @@ const SEED_DATA = [
       {
         name: 'Tyrion Lannister',
         quotes: [
-          'I drink and I know things.',
-          'Never forget what you are.',
-          'A Lannister always pays his debts.',
-          'Death is so final, whereas life is full of possibilities.',
-          "It's not easy being drunk all the time.",
+          'Bebo y sé cosas.',
+          'Nunca olvides lo que eres.',
+          'Un Lannister siempre paga sus deudas.',
+          'La muerte es muy definitiva, mientras que la vida está llena de posibilidades.',
+          'No es fácil estar borracho todo el tiempo.',
         ],
       },
     ],
@@ -456,7 +456,9 @@ async function runSeed() {
   await Author.deleteMany({});
   await Quote.deleteMany({});
 
-  console.log('🌱 Sembrando Categorías, Autores y 200 Frases de una...');
+  console.log(
+    '🌱 Sembrando Categorías, Autores y 200 Frases 100% en español...',
+  );
 
   // 🔥 Lógica de doble bucle: Recorremos la Data Maestra e insertamos todo automáticamente
   for (const catData of SEED_DATA) {
@@ -475,7 +477,7 @@ async function runSeed() {
     }
   }
 
-  console.log('✨ ¡Seed de 200 frases completado con éxito!');
+  console.log('✨ ¡Seed de 200 frases en español completado con éxito!');
   await mongoose.disconnect();
 }
 

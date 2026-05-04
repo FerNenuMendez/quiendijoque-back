@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Controller, Get, Post, Body, UseGuards, Req } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
+import { UsersService } from '../users/users.service'; // 🔥 Inyectamos el servicio de usuarios
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -10,15 +11,18 @@ import {
   ApiTags,
   ApiOperation,
   ApiResponse,
-  ApiCookieAuth,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { CreateCategoryDto } from './dto/create-category.dto';
 
 @ApiTags('Categorias')
-@ApiCookieAuth()
+@ApiBearerAuth() // 🔥 Cambiado a BearerAuth ya que estás usando tokens JWT móviles
 @Controller('categories')
 export class CategoriesController {
-  constructor(private readonly categoriesService: CategoriesService) {}
+  constructor(
+    private readonly categoriesService: CategoriesService,
+    private readonly usersService: UsersService, // 🔥 Lo agregamos al constructor
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @ApiOperation({
@@ -26,12 +30,21 @@ export class CategoriesController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Lista de categorías evaluadas según el rol del usuario.',
+    description:
+      'Lista de categorías evaluadas según el rol y compras del usuario.',
   })
   @Get()
-  findAll(@Req() req: Request) {
-    const userRole = (req.user as any).role as Role;
-    return this.categoriesService.findAllForUser(userRole);
+  async findAll(@Req() req: Request) {
+    const userPayload = req.user as any;
+    const userRole = userPayload.role as Role;
+    const userId = userPayload.userId;
+
+    // 🔥 Buscamos al usuario en la BD para ver qué llaves tiene compradas
+    const fullUser = await this.usersService.findById(userId);
+    const unlockedCategories = fullUser?.unlockedCategories || [];
+
+    // Le pasamos el array al servicio
+    return this.categoriesService.findAllForUser(userRole, unlockedCategories);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -49,7 +62,6 @@ export class CategoriesController {
   })
   @Post()
   create(@Body() createCategoryDto: CreateCategoryDto) {
-    // Usamos el DTO
     return this.categoriesService.create(createCategoryDto);
   }
 }

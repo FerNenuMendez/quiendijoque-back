@@ -16,8 +16,8 @@ export class CategoriesService {
     return newCategory.save();
   }
 
-  // Método estrella: Trae las categorías y calcula si están bloqueadas
-  async findAllForUser(userRole: Role) {
+  // Método estrella: ahora sabe si el usuario compró categorías
+  async findAllForUser(userRole: Role, unlockedCategories: string[] = []) {
     const categories = await this.categoryModel.find().exec();
 
     // Si es ADMIN o USERPLUS, tiene pase libre
@@ -26,10 +26,19 @@ export class CategoriesService {
 
     return categories.map((cat) => {
       const categoryObj = cat.toJSON();
+
+      // 🔥 FIX TYPE-SCRIPT: Mongoose siempre tiene _id, lo leemos directo del documento
+      const catId = cat._id.toString();
+
+      // LA MAGIA: ¿Está bloqueada?
+      const isLocked =
+        !hasPremiumAccess &&
+        categoryObj.requiresPremium &&
+        !unlockedCategories.includes(catId);
+
       return {
         ...categoryObj,
-        // Agregamos este flag dinámico para que el frontend sepa si dibujar el candado
-        isLocked: !hasPremiumAccess && categoryObj.requiresPremium,
+        isLocked,
       };
     });
   }

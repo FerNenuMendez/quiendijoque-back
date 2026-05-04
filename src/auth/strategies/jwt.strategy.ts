@@ -9,11 +9,13 @@ import { Request } from 'express';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private configService: ConfigService) {
+  constructor(configService: ConfigService) {
     super({
+      // 🔥 EL TRUCO MAESTRO: Buscamos en ambos lados
       jwtFromRequest: ExtractJwt.fromExtractors([
+        ExtractJwt.fromAuthHeaderAsBearerToken(), // 1. Primero busca en el Header (Mobile)
         (request: Request) => {
-          return request?.cookies?.access_token;
+          return request?.cookies?.access_token; // 2. Si no lo encuentra, busca en la Cookie (Web)
         },
       ]),
       ignoreExpiration: false,
@@ -22,7 +24,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   validate(payload: any) {
-    // Lo que retornes acá es lo que después ves en "req.user"
     return { userId: payload.sub, email: payload.email, role: payload.role };
   }
 }

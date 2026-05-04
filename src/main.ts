@@ -4,6 +4,7 @@ import { AppModule } from './app.module';
 import cookieParser from 'cookie-parser';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { json, urlencoded } from 'express';
 import helmet from 'helmet';
 
 async function bootstrap() {
@@ -19,12 +20,18 @@ async function bootstrap() {
     }),
   );
   app.use(cookieParser());
+
+  // Aumentar el límite para recibir imágenes en Base64
+  app.use(json({ limit: '5mb' }));
+  app.use(urlencoded({ extended: true, limit: '5mb' }));
+
+  // CORS
   app.enableCors({
     origin: 'http://localhost:3000',
     credentials: true,
   });
 
-  // 👇 Actualizamos la config de Swagger
+  // Config de Swagger
   const config = new DocumentBuilder()
     .setTitle('¿Quién Dijo Qué? - API')
     .setDescription(

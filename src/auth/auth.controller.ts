@@ -75,7 +75,7 @@ export class AuthController {
   }
 
   // ====================================================================
-  // LOGIN TRADICIONAL
+  // LOGIN TRADICIONAL WEB (Cookies)
   // ====================================================================
   @ApiOperation({ summary: 'Login tradicional con email y contraseña' })
   @ApiBody({ type: LoginDto })
@@ -110,6 +110,26 @@ export class AuthController {
   logout(@Res({ passthrough: true }) res: express.Response) {
     res.clearCookie('access_token');
     return { message: 'Sesión cerrada correctamente' };
+  }
+
+  // ====================================================================
+  // LOGIN MOBILE (Para la app en Expo)
+  // ====================================================================
+  @ApiOperation({ summary: 'Login exclusivo para la App Móvil' })
+  @Post('login/mobile')
+  async loginMobile(@Body() loginDto: LoginDto) {
+    // Reutilizamos tu misma lógica de validación
+    const authData = await this.authService.login(
+      loginDto.email,
+      loginDto.password,
+    );
+
+    // Acá NO usamos res.cookie. Mandamos el token directamente en la respuesta.
+    return {
+      message: 'Login móvil exitoso',
+      user: authData.user,
+      token: authData.access_token, // El "Pase VIP" para el celular
+    };
   }
 
   // ====================================================================

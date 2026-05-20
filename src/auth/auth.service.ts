@@ -57,7 +57,7 @@ export class AuthService {
   // ====================================================================
   // 🔥 VERIFICACIÓN DEL TOKEN MÓVIL (EXPO) 🔥
   // ====================================================================
-  async verifyGoogleMobileToken(idToken: string, res: Response) {
+  async verifyGoogleMobileToken(idToken: string) {
     try {
       // 1. Instanciamos el cliente acá mismo en el momento de la petición (Solución al Error 1)
       const googleClient = new OAuth2Client(
@@ -103,18 +103,7 @@ export class AuthService {
       };
       const accessToken = this.jwtService.sign(jwtPayload);
 
-      const isProduction =
-        this.configService.get<string>('NODE_ENV') === 'production';
-
-      // 5. Seteamos la cookie
-      res.cookie('access_token', accessToken, {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: 'strict',
-        maxAge: 1000 * 60 * 60 * 24, // 1 día
-      });
-
-      // 6. Devolvemos el usuario y el token explícitamente para el frontend móvil
+      // 5. Devolvemos el usuario y el token explícitamente para el frontend
       return {
         message: 'Login móvil con Google exitoso',
         user: {
@@ -138,7 +127,7 @@ export class AuthService {
   // ====================================================================
   // GOOGLE LOGIN (WEB CLÁSICO)
   // ====================================================================
-  async googleLogin(user: GoogleUser, res: Response) {
+  async googleLogin(user: GoogleUser) {
     if (!user) {
       throw new BadRequestException('No se recibió el usuario de Google');
     }
@@ -167,18 +156,9 @@ export class AuthService {
     };
     const accessToken = this.jwtService.sign(payload);
 
-    const isProduction =
-      this.configService.get<string>('NODE_ENV') === 'production';
-
-    res.cookie('access_token', accessToken, {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: 'strict',
-      maxAge: 1000 * 60 * 60 * 24, // 1 día
-    });
-
     return {
       message: 'Login con Google exitoso',
+      token: accessToken,
       user: {
         _id: userInDb.id,
         email: userInDb.email,

@@ -50,11 +50,8 @@ export class AuthController {
   @ApiOperation({ summary: 'Callback de Google OAuth' })
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
-  async googleAuthRedirect(
-    @Req() req: any,
-    @Res({ passthrough: true }) res: express.Response,
-  ) {
-    return this.authService.googleLogin(req.user, res);
+  async googleAuthRedirect(@Req() req: any) {
+    return this.authService.googleLogin(req.user);
   }
 
   // ====================================================================
@@ -64,14 +61,11 @@ export class AuthController {
   @ApiBody({ schema: { properties: { token: { type: 'string' } } } })
   @ApiResponse({ status: 200, description: 'Login exitoso desde móvil.' })
   @Post('google/mobile')
-  async googleLoginMobile(
-    @Body('token') token: string,
-    @Res({ passthrough: true }) res: express.Response,
-  ) {
+  async googleLoginMobile(@Body('token') token: string) {
     if (!token) {
       throw new BadRequestException('Falta el token de Google');
     }
-    return this.authService.verifyGoogleMobileToken(token, res);
+    return this.authService.verifyGoogleMobileToken(token);
   }
 
   // ====================================================================
@@ -80,35 +74,22 @@ export class AuthController {
   @ApiOperation({ summary: 'Login tradicional con email y contraseña' })
   @ApiBody({ type: LoginDto })
   @Post('login')
-  async login(
-    @Body() loginDto: LoginDto,
-    @Res({ passthrough: true }) res: express.Response,
-  ) {
+  async login(@Body() loginDto: LoginDto) {
     const authData = await this.authService.login(
       loginDto.email,
       loginDto.password,
     );
 
-    const isProduction =
-      this.configService.get<string>('NODE_ENV') === 'production';
-
-    res.cookie('access_token', authData.access_token, {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: 'strict',
-      maxAge: 1000 * 60 * 60 * 24,
-    });
-
     return {
       message: 'Login exitoso',
+      token: authData.access_token,
       user: authData.user,
     };
   }
 
   @ApiOperation({ summary: 'Cerrar sesión' })
   @Post('logout')
-  logout(@Res({ passthrough: true }) res: express.Response) {
-    res.clearCookie('access_token');
+  logout() {
     return { message: 'Sesión cerrada correctamente' };
   }
 

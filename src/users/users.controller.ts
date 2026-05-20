@@ -53,23 +53,7 @@ export class UsersController {
     };
   }
 
-  @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Sumar puntos al usuario tras ganar una ronda' })
-  @Patch('me/score')
-  async updateScore(@Req() req: Request, @Body('points') points: number) {
-    const userId = (req.user as any).userId;
 
-    if (!points || points < 0 || points > 100) {
-      return { message: 'Puntaje inválido' };
-    }
-
-    const updatedUser = await this.usersService.addPoints(userId, points);
-
-    return {
-      message: 'Puntos sumados correctamente',
-      totalPoints: updatedUser.totalPoints,
-    };
-  }
 
   @UseGuards(JwtAuthGuard)
   @Post('me/unlock')
@@ -138,7 +122,7 @@ export class UsersController {
     description: 'Prohibido: No tienes permisos suficientes.',
   })
   @Get('admin-dashboard')
-  @Roles(Role.USER) // Tech Lead Note: ¿Seguro que es Role.USER acá? Ojo con esto si es de admin.
+  @Roles(Role.ADMIN) // 🔥 CORREGIDO: Solo administradores
   @UseGuards(JwtAuthGuard, RolesGuard)
   getAdminData() {
     return { message: 'Bienvenido al panel de control, jefe' };

@@ -5,68 +5,60 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Inject,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Quote } from '../quotes/schemas/quote.schema';
 import { Author } from '../quotes/schemas/author.schema';
+import { UsersService } from '../users/users.service';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class GameService {
   constructor(
     @InjectModel(Quote.name) private quoteModel: Model<Quote>,
     @InjectModel(Author.name) private authorModel: Model<Author>,
+    private usersService: UsersService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
-  async generateRound(categoryId: string) {
-    // 1. Validamos que el ID sea un ObjectId válido de Mongo
+  async getNextQuestion(userId: string, categoryId: string) {
     if (!Types.ObjectId.isValid(categoryId)) {
       throw new NotFoundException('Categoría no válida');
     }
 
     const categoryObjectId = new Types.ObjectId(categoryId);
 
-    // 🔥 LA MAGIA NUEVA: Buscamos TODOS los IDs de los autores que tienen al menos una frase en ESTA categoría
     const validAuthorIds = await this.quoteModel.distinct('authorId', {
       categoryId: categoryObjectId,
     });
 
-    // 2. El Aggregation Pipeline
     const questions = await this.quoteModel.aggregate([
-      // Paso A: Filtramos las frases por la categoría elegida
       { $match: { categoryId: categoryObjectId } },
-
-      // Paso B: Agarramos 10 frases al azar ($sample es el rey acá)
-      { $sample: { size: 10 } },
-
-      // Paso C: Traemos los datos del autor real
+      // Agarramos 1 sola frase al azar
+      { $sample: { size: 1 } },
       {
         $lookup: {
-          from: 'game_authors', // Nombre de la colección en la BD
+          from: 'game_authors',
           localField: 'authorId',
           foreignField: '_id',
           as: 'correctAuthor',
         },
       },
-
-      // Paso D: Como $lookup devuelve un array, lo desarmamos para que sea un objeto
       { $unwind: '$correctAuthor' },
-
-      // Paso E: El truco maestro corregido. Buscamos 3 autores al azar de la misma categoría
       {
         $lookup: {
           from: 'game_authors',
-          let: { realAuthorId: '$authorId' }, // Definimos una variable temporal
+          let: { realAuthorId: '$authorId' },
           pipeline: [
             {
               $match: {
-                // 1. Nos aseguramos de que el autor pertenezca a la categoría actual
                 _id: { $in: validAuthorIds },
-                // 2. Filtramos para que el ID del distractor NO sea el real
                 $expr: { $ne: ['$_id', '$$realAuthorId'] },
               },
             },
-            // Agarramos 3 al azar dentro de ese grupo filtrado
             { $sample: { size: 3 } },
           ],
           as: 'distractors',
@@ -80,29 +72,35 @@ export class GameService {
       );
     }
 
-    // 3. Formateamos la respuesta para el Frontend (y escondemos la respuesta correcta)
-    return questions.map((q) => {
-      // Unimos el autor real con los distractores
-      const allOptions = [
-        {
-          id: q.correctAuthor._id,
-          name: q.correctAuthor.name,
-          avatar: q.correctAuthor.avatarUrl,
-        },
-        ...q.distractors.map((d) => ({
-          id: d._id,
-          name: d.name,
-          avatar: d.avatarUrl,
-        })),
-      ];
+    const q = questions[0];
+    const allOptions = [
+      {
+        id: q.correctAuthor._id,
+        name: q.correctAuthor.name,
+        avatar: q.correctAuthor.avatarUrl,
+      },
+      ...q.distractors.map((d) => ({
+        id: d._id,
+        name: d.name,
+        avatar: d.avatarUrl,
+      })),
+    ];
 
-      return {
-        quoteId: q._id,
-        text: q.text,
-        // Mezclamos el array para que la correcta no esté siempre primera
-        options: this.shuffleArray(allOptions),
-      };
-    });
+    // Iniciamos o recuperamos la sesión en caché
+    const cacheKey = `game_session_${userId}`;
+    const existingSession = await this.cacheManager.get<{ currentStreak: number }>(cacheKey);
+    const currentStreak = existingSession ? existingSession.currentStreak : 0;
+
+    await this.cacheManager.set(cacheKey, {
+      startTime: Date.now(),
+      currentStreak: currentStreak
+    }, 15000); // 15 segundos TTL en milisegundos
+
+    return {
+      quoteId: q._id,
+      text: q.text,
+      options: this.shuffleArray(allOptions),
+    };
   }
 
   // Función auxiliar de Fisher-Yates para mezclar arrays de forma aleatoria perfecta
@@ -114,29 +112,82 @@ export class GameService {
     return array;
   }
 
-  async checkAnswer(quoteId: string, selectedAuthorId: string) {
-    // 1. Validamos que nos manden IDs con formato correcto de Mongo
-    if (
-      !Types.ObjectId.isValid(quoteId) ||
-      !Types.ObjectId.isValid(selectedAuthorId)
-    ) {
+  async checkAnswer(
+    userId: string,
+    quoteId: string,
+    selectedAuthorId: string,
+  ) {
+    if (!Types.ObjectId.isValid(quoteId)) {
       throw new BadRequestException('Formato de ID inválido');
     }
 
-    // 2. Buscamos la frase original en la base de datos
-    const quote = await this.quoteModel.findById(quoteId).exec();
+    const cacheKey = `game_session_${userId}`;
+    const session = await this.cacheManager.get<{ startTime: number, currentStreak: number }>(cacheKey);
 
+    // Si no hay sesión o no tiene startTime, asumimos Time Out o Trampa
+    if (!session || !session.startTime) {
+      const user = await this.usersService.findById(userId);
+      await this.cacheManager.del(cacheKey); // Limpiamos racha
+
+      const quote = await this.quoteModel.findById(quoteId).exec();
+      return {
+        isCorrect: false,
+        correctAuthorId: quote ? quote.authorId.toString() : null,
+        pointsEarned: 0,
+        newTotalScore: user ? user.totalPoints : 0,
+        currentStreak: 0,
+        message: '¡Se acabó el tiempo!',
+      };
+    }
+
+    const elapsedTime = Date.now() - session.startTime;
+
+    // Borramos el startTime para que no se pueda reutilizar en la misma pregunta, pero mantenemos la racha pendiente
+    await this.cacheManager.set(cacheKey, { currentStreak: session.currentStreak }, 15000);
+
+    const quote = await this.quoteModel.findById(quoteId).exec();
     if (!quote) {
       throw new NotFoundException('La frase solicitada no existe');
     }
 
-    // 3. Comparamos el autor real con el que eligió el jugador
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
     const isCorrect = quote.authorId.toString() === selectedAuthorId;
 
-    // 4. Devolvemos el veredicto y el ID correcto (para que el frontend pinte el botón de verde/rojo)
+    let pointsEarned = 0;
+    let newStreak = session.currentStreak || 0;
+
+    if (isCorrect) {
+      newStreak += 1;
+
+      // Calculamos tiempo restante real basado en 10s máximo
+      const timeLeftReal = Math.max(0, 10000 - elapsedTime);
+      const isSpeedBonus = timeLeftReal >= 8000;
+      
+      let activeMultiplier = 1;
+      if (newStreak >= 3 || isSpeedBonus) {
+        activeMultiplier = 2;
+      }
+
+      pointsEarned = 10 * activeMultiplier;
+      user.totalPoints = (user.totalPoints || 0) + pointsEarned;
+      
+      await user.save();
+      await this.cacheManager.set(cacheKey, { currentStreak: newStreak }, 15000);
+    } else {
+      newStreak = 0;
+      await this.cacheManager.del(cacheKey); // Borramos racha
+    }
+
     return {
       isCorrect,
       correctAuthorId: quote.authorId.toString(),
+      pointsEarned,
+      newTotalScore: user.totalPoints,
+      currentStreak: newStreak,
     };
   }
 }

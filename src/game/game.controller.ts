@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, Req } from '@nestjs/common';
+import { Request } from 'express';
 import { GameService } from './game.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import {
@@ -11,14 +12,14 @@ import {
 import { SubmitAnswerDto } from './dto/submit-answer.dto';
 
 @ApiTags('Juego')
-@ApiCookieAuth() // Cambiamos ApiBearerAuth por esto
+@ApiCookieAuth()
 @Controller('game')
 export class GameController {
   constructor(private readonly gameService: GameService) {}
 
   @UseGuards(JwtAuthGuard)
   @ApiOperation({
-    summary: 'Generar una ronda de 10 preguntas para una categoría',
+    summary: 'Obtener una pregunta aleatoria y activar el temporizador en el servidor',
   })
   @ApiParam({
     name: 'categoryId',
@@ -27,19 +28,18 @@ export class GameController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Ronda generada con las opciones mezcladas.',
+    description: 'Pregunta generada con éxito.',
   })
-  @ApiResponse({
-    status: 404,
-    description: 'Categoría no válida o sin frases.',
-  })
-  @Get('round/:categoryId')
-  async getRound(@Param('categoryId') categoryId: string) {
-    const questions = await this.gameService.generateRound(categoryId);
+  @Get('next-question/:categoryId')
+  async getNextQuestion(
+    @Param('categoryId') categoryId: string,
+    @Req() req: Request,
+  ) {
+    const userId = (req.user as any).userId;
+    const question = await this.gameService.getNextQuestion(userId, categoryId);
     return {
-      message: 'Ronda generada con éxito',
-      totalQuestions: questions.length,
-      questions,
+      message: 'Pregunta generada con éxito',
+      question,
     };
   }
 
@@ -49,14 +49,14 @@ export class GameController {
     status: 200,
     description: 'Devuelve si acertó y cuál era el autor correcto.',
   })
-  @ApiResponse({
-    status: 400,
-    description: 'Faltan IDs o tienen formato inválido.',
-  })
   @Post('answer')
-  async submitAnswer(@Body() submitAnswerDto: SubmitAnswerDto) {
-    // Usamos el DTO
+  async submitAnswer(
+    @Body() submitAnswerDto: SubmitAnswerDto,
+    @Req() req: Request,
+  ) {
+    const userId = (req.user as any).userId;
     return this.gameService.checkAnswer(
+      userId,
       submitAnswerDto.quoteId,
       submitAnswerDto.selectedAuthorId,
     );

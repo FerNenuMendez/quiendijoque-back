@@ -114,7 +114,7 @@ export class AuthService {
         maxAge: 1000 * 60 * 60 * 24, // 1 día
       });
 
-      // 6. Devolvemos el usuario
+      // 6. Devolvemos el usuario y el token explícitamente para el frontend móvil
       return {
         message: 'Login móvil con Google exitoso',
         user: {
@@ -124,6 +124,7 @@ export class AuthService {
           username: userInDb.username,
           role: userInDb.role,
         },
+        token: accessToken, // El "Pase VIP" devuelto explícitamente en el JSON
       };
     } catch (error) {
       console.error(

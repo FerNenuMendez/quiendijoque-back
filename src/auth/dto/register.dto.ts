@@ -42,14 +42,4 @@ export class RegisterDto {
   @IsString()
   @IsNotEmpty()
   name: string;
-
-  @ApiProperty({
-    enum: Role,
-    default: Role.USER,
-    required: false,
-    description: 'Nivel de acceso del usuario (Opcional, por defecto USER)',
-  })
-  @IsEnum(Role)
-  @IsOptional()
-  role?: Role;
 }

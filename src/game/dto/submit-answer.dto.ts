@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsMongoId, IsNotEmpty } from 'class-validator';
+import { IsMongoId, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 
 export class SubmitAnswerDto {
   @ApiProperty({

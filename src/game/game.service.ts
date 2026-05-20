@@ -13,7 +13,7 @@ import { Quote } from '../quotes/schemas/quote.schema';
 import { Author } from '../quotes/schemas/author.schema';
 import { UsersService } from '../users/users.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
+import type { Cache } from 'cache-manager';
 
 @Injectable()
 export class GameService {

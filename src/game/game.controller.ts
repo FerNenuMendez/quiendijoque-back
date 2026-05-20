@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Param, UseGuards, Req } from '@nestjs/common';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { GameService } from './game.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import {

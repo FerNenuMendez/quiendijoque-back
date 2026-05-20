@@ -90,7 +90,6 @@ export class AuthService {
           username: `${baseUsername}_${randomSuffix}`,
           name: payload.name || `${payload.given_name} ${payload.family_name}`,
           password: randomPassword,
-          role: Role.USER,
           // (Solución al Error 2: Eliminamos la propiedad isVerified)
         });
       }
@@ -144,7 +143,6 @@ export class AuthService {
         username: `${baseUsername}_${randomSuffix}`,
         name: `${user.firstName} ${user.lastName}`,
         password: randomPassword,
-        role: Role.USER,
         // (Solución al Error 2 también aplicada acá)
       });
     }
